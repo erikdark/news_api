@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latest Technology News</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #newsList {
+            display: flex;
+            flex-direction: column;
+        }
+        .newsItem {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .newsItem h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .newsItem p {
+            margin: 5px 0;
+        }
+        #searchBox {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Latest Technology News</h1>
+    
+    <input type="text" id="searchBox" placeholder="Search news..." oninput="fetchNews()" />
+
+    <div id="newsList"></div>
+
+    <script>
+        let allNews = [];
+
+        async function fetchNews() {
+            const searchQuery = document.getElementById('searchBox').value || 'technology';
+            const apiKey = '7c71bfb543a942b692e5d5c1c6a9c6fd';  // Вставьте сюда свой API ключ
+            const url = `https://newsapi.org/v2/everything?q=${searchQuery}&apiKey=${apiKey}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.status === 'ok') {
+                allNews = data.articles;
+                renderNews(allNews);
+            } else {
+                alert("Error fetching news.");
+            }
+        }
+
+        function renderNews(news) {
+            const newsListElement = document.getElementById('newsList');
+            newsListElement.innerHTML = ''; // Очистить текущие новости
+
+            news.forEach(article => {
+                const newsItem = document.createElement('div');
+                newsItem.classList.add('newsItem');
+                newsItem.innerHTML = `
+                    <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+                    <p>${article.description}</p>
+                    <p><strong>Source:</strong> ${article.source.name}</p>
+                `;
+                newsListElement.appendChild(newsItem);
+            });
+        }
+
+        // Загружаем новости при загрузке страницы
+        window.onload = fetchNews;
+    </script>
+</body>
+</html>
