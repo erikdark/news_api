@@ -3,75 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Latest Technology News</title>
+    <title>News Fetcher</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
         }
         #newsList {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
         }
-        .newsItem {
+        .news {
+            width: 300px;
+            margin: 10px;
             border: 1px solid #ccc;
             padding: 10px;
-            margin-bottom: 10px;
+            text-align: center;
         }
-        .newsItem h3 {
-            margin: 0;
-            font-size: 1.2em;
-        }
-        .newsItem p {
-            margin: 5px 0;
+        .news img {
+            width: 100%;
+            height: auto;
         }
         #searchBox {
-            margin-bottom: 20px;
             padding: 10px;
+            margin-bottom: 20px;
             width: 300px;
+            font-size: 16px;
+        }
+        #searchBtn {
+            padding: 10px 20px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <h1>Latest Technology News</h1>
-    
-    <input type="text" id="searchBox" placeholder="Search news..." oninput="fetchNews()" />
+    <h1>Latest News</h1>
+
+    <!-- Поисковая строка для фильтрации новостей -->
+    <input type="text" id="searchBox" placeholder="Search news..." />
+    <button id="searchBtn">Search</button>
 
     <div id="newsList"></div>
 
     <script>
+        const apiKey = '7c71bfb543a942b692e5d5c1c6a9c6fd';  // Рабочий API ключ
         let allNews = [];
 
+        // Функция для получения новостей с NewsAPI
         async function fetchNews() {
-            const searchQuery = document.getElementById('searchBox').value || 'technology';
-            const apiKey = '7c71bfb543a942b692e5d5c1c6a9c6fd';  // Вставьте сюда свой API ключ
+            const searchQuery = document.getElementById('searchBox').value || 'technology';  // Поиск по умолчанию
             const url = `https://newsapi.org/v2/everything?q=${searchQuery}&apiKey=${apiKey}`;
-            const response = await fetch(url);
-            const data = await response.json();
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log('API response:', data);  // Добавляем вывод ответа в консоль для отладки
 
-            if (data.status === 'ok') {
-                allNews = data.articles;
-                renderNews(allNews);
-            } else {
+                if (data.status === 'ok') {
+                    allNews = data.articles;
+                    renderNews(allNews);
+                } else {
+                    alert("Error fetching news.");
+                }
+            } catch (error) {
+                console.error('Error fetching news:', error);
                 alert("Error fetching news.");
             }
         }
 
+        // Функция для отображения новостей на сайте
         function renderNews(news) {
             const newsListElement = document.getElementById('newsList');
-            newsListElement.innerHTML = ''; // Очистить текущие новости
+            newsListElement.innerHTML = '';  // Очистка списка новостей
 
-            news.forEach(article => {
-                const newsItem = document.createElement('div');
-                newsItem.classList.add('newsItem');
-                newsItem.innerHTML = `
-                    <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
-                    <p>${article.description}</p>
-                    <p><strong>Source:</strong> ${article.source.name}</p>
+            news.forEach(item => {
+                const newsDiv = document.createElement('div');
+                newsDiv.classList.add('news');
+                newsDiv.innerHTML = `
+                    <img src="${item.urlToImage}" alt="${item.title}" />
+                    <h3>${item.title}</h3>
+                    <p>${item.description}</p>
+                    <a href="${item.url}" target="_blank">Read more</a>
                 `;
-                newsListElement.appendChild(newsItem);
+                newsListElement.appendChild(newsDiv);
             });
         }
+
+        // Обработчик нажатия на кнопку поиска
+        document.getElementById('searchBtn').addEventListener('click', fetchNews);
 
         // Загружаем новости при загрузке страницы
         window.onload = fetchNews;
